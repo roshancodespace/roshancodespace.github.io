@@ -1,0 +1,71 @@
+---
+title: "shonenx-website"
+tagline: "A no-nonsense download page and docs hub for ShonenX."
+description: "The web landing page for ShonenX. Mostly exists because expecting non-technical users to navigate GitHub releases to find the right APK or AppImage was an exercise in frustration."
+category: "Web & Docs"
+year: "2024"
+role: "Creator"
+status: "Active · Live"
+
+order: 50
+featured: false
+
+accentColor: "#14b8a6"
+
+githubUrl: "https://github.com/roshancodespace/shonenx-website"
+languages: ["TypeScript", "Tailwind CSS", "Astro"]
+
+specs:
+  - label: "Purpose"
+    value: "One-click installer downloads & extension documentation"
+  - label: "Automation"
+    value: "Dynamic GitHub release asset resolution"
+  - label: "Stack"
+    value: "Astro, Tailwind CSS, Edge static hosting"
+
+previewSnippet:
+  lang: typescript
+  code: |
+    const res = await fetch('https://api.github.com/repos/roshancodespace/ShonenX/releases/latest');
+    const release = await res.json();
+    const installer = detectPlatformAsset(release.assets, userAgent);
+---
+
+## Overview & Motivation
+
+When you build a cross-platform client that compiles to Android APKs, Linux AppImages, Windows installers, and macOS packages, you quickly run into a dumb reality: nobody wants to hunt through a GitHub release page full of forty different binary files with cryptic filenames.
+
+The website exists to solve that one problem. It detects your operating system, puts the right download button right in front of your face, and gets out of the way.
+
+It also doubles as a simple documentation hub for explaining how the community extension system works, so I don't have to answer the same setup questions over and over in issues.
+
+## Architecture & Decisions
+
+It didn't need to be an overengineered microservice. It's a clean static site that does two practical things.
+
+<Point title="Zero-Click Platform Detection">
+Sniffs the client user-agent on load to immediately surface the right native installer (Android APK vs Linux AppImage vs Windows binary) as the primary call to action.
+</Point>
+
+<Point title="Automatic Release Asset Sync">
+Fetches release manifests directly from GitHub so I don't have to manually update HTML links and version badges every time I push a patch tag.
+</Point>
+
+## Engineering Challenges
+
+<Challenge title="GitHub API Rate Limits on Build">
+  <Problem>Pinging GitHub's unauthenticated API on every dev reload or edge render runs straight into the 60 requests/hour rate limit wall.</Problem>
+  <Solution>Cached the resolved release payload at build time with a fallback stale manifest so page loads never fail if GitHub gets grumpy.</Solution>
+</Challenge>
+
+## Stack & Rationale
+
+<Stack>
+  <StackItem name="Astro" role="Framework">Generates zero-JS static HTML by default. The site loads essentially instantly.</StackItem>
+  <StackItem name="Tailwind CSS" role="Styling">Quick way to match the dark AMOLED aesthetic of the actual desktop client.</StackItem>
+</Stack>
+
+## What I Learned
+
+- If downloading your app takes more than two clicks, half the people interested won't bother. Make the download button obvious.
+- Static sites that pull metadata at build time beat bloated dynamic web apps every day of the week for simple project showcases.

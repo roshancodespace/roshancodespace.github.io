@@ -1,0 +1,86 @@
+---
+title: "noob-cli"
+tagline: "A half-baked terminal assistant experiment with a dual-agent twist."
+description: "An unfinished CLI assistant I put together to learn agent workflows. Not polished, but features a dual-agent setup where you can trigger a /buddy chat mid-stream in the same session, plus basic tool isolation."
+category: "Terminal CLI · Experiment"
+year: "2024"
+role: "Sole Hacker"
+status: "Unfinished · Prototype"
+
+order: 30
+featured: true
+
+accentColor: "#f59e0b"
+
+githubUrl: "https://github.com/roshancodespace/noob-cli"
+languages: ["TypeScript", "Node.js", "LLMs"]
+
+specs:
+  - label: "Runtime"
+    value: "Node.js / Bun"
+  - label: "Architecture"
+    value: "Dual-Agent (Planner + /buddy Interruption)"
+  - label: "Models"
+    value: "Local (Ollama) & Remote APIs"
+  - label: "Safety"
+    value: "Basic tool isolation & destructive flag guards"
+
+previewSnippet:
+  lang: bash
+  code: |
+    $ noob "find all dangling docker volumes and prune"
+    [planner] analyzing local engine state...
+    > /buddy "wait, is this going to delete my active postgres data?"
+    [buddy] nope, -qf dangling=true only touches unreferenced volumes.
+    [executor] docker volume ls -qf dangling=true | xargs -r docker volume rm
+    run this? (y/N):
+---
+
+## Overview & Motivation
+
+Let's be real: noob-cli is an unfinished project I built purely for learning purposes. It is not going to replace your shell or take over the world.
+
+I wanted to actually understand how LLM agent loops, tool calling, and local execution pipelines fit together under the hood, rather than just reading hype tweets about autonomous agents.
+
+The premise was simple: existing terminal AI wrappers were either rigid single-turn curl scripts, or bloated daemons that phoned your entire terminal history back to external servers. I wanted a lightweight local experiment with actual guardrails so an LLM hallucination wouldn't accidentally format a partition.
+
+## Architecture & Decisions
+
+The core idea was splitting the task between a planner that orchestrates tools and an interactive companion that shares session context.
+
+<Point title="Dual-Agent Pipeline with /buddy Interruption">
+While the primary agent is parsing intent or executing tools, you can type `/buddy` to trigger an inline chat within the exact same session. You don't have to kill the process or start a new thread just to ask why it picked a certain flag.
+</Point>
+
+<Point title="Basic Tool Isolation & Guardrails">
+Before any shell command gets anywhere near execution, it passes through a heuristic check for destructive patterns (`rm -rf`, `dd`, `mkfs`, raw writes). Anything questionable is locked behind an explicit user confirmation prompt.
+</Point>
+
+<Point title="Local-First Model Support">
+Plugged directly into local Ollama instances so everyday shell queries stay on-device without cloud latency or subscription friction.
+</Point>
+
+## Engineering Challenges
+
+<Challenge title="Handling Stdin Mid-Stream">
+  <Problem>Allowing the user to type `/buddy` and steer the session while an LLM was actively streaming token output without corrupting raw terminal ANSI buffers.</Problem>
+  <Solution>Separated raw input capturing from the output render stream, parking the executor pipeline while the conversational agent responds.</Solution>
+</Challenge>
+
+<Challenge title="LLM Syntax Hallucinations">
+  <Problem>Smaller local models love inventing non-existent command flags for complex utilities like `tar` or `ffmpeg` with absolute confidence.</Problem>
+  <Solution>Constrained command suggestions to validated tool paths and schema checks before presenting them to the user.</Solution>
+</Challenge>
+
+## Stack & Rationale
+
+<Stack>
+  <StackItem name="TypeScript" role="Language">Fast prototyping of message schemas and CLI argument trees without fighting the type system.</StackItem>
+  <StackItem name="Node.js / Bun" role="Runtime">Quick startup and painless child process management for shell execution.</StackItem>
+  <StackItem name="Ollama" role="Inference">Keeps command generation local, private, and free.</StackItem>
+</Stack>
+
+## What I Learned
+
+- Building multi-agent handoffs is easy on paper; managing asynchronous terminal I/O between two models sharing one terminal window is where the headache lives.
+- It's unfinished and rough around the edges, but building it from scratch taught me ten times more about agent state and security than using a canned framework would have.

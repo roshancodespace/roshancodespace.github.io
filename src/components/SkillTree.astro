@@ -1,0 +1,95 @@
+---
+interface Skill {
+	name: string;
+	tag?: string;
+}
+
+interface Category {
+	number: string;
+	title: string;
+	skills: Skill[];
+}
+
+const categories: Category[] = [
+	{
+		number: "01",
+		title: "Languages & Runtimes",
+		skills: [
+			{ name: "Dart", tag: "AOT & Isolates" },
+			{ name: "TypeScript", tag: "Strict & Node" },
+			{ name: "JavaScript", tag: "ESNext Web" },
+			{ name: "Python", tag: "Automation" },
+			{ name: "C / C++", tag: "FFI & Bindings" },
+			{ name: "Bash / Fish", tag: "Shell Scripting" },
+		],
+	},
+	{
+		number: "02",
+		title: "Mobile & Frontend",
+		skills: [
+			{ name: "Flutter", tag: "Cross-Platform" },
+			{ name: "Astro", tag: "Zero-JS Static" },
+			{ name: "Tailwind CSS", tag: "Design Tokens" },
+			{ name: "HTML5 Canvas", tag: "CustomPainter" },
+			{ name: "Riverpod", tag: "Reactive State" },
+		],
+	},
+	{
+		number: "03",
+		title: "Systems & Internals",
+		skills: [
+			{ name: "Linux", tag: "POSIX & Processes" },
+			{ name: "Shizuku", tag: "Binder IPC" },
+			{ name: "Android API", tag: "Scoped Storage" },
+			{ name: "Worker Isolates", tag: "Multi-Threaded" },
+			{ name: "media_kit", tag: "libmpv Engine" },
+			{ name: "TCP & Sockets", tag: "Chunked Streams" },
+		],
+	},
+	{
+		number: "04",
+		title: "Storage & Tooling",
+		skills: [
+			{ name: "Isar NoSQL", tag: "Embedded Fast" },
+			{ name: "SQLite", tag: "Local Relational" },
+			{ name: "Git", tag: "Rebase & Bisect" },
+			{ name: "Vite & Pnpm", tag: "Build Pipelines" },
+			{ name: "CMake & Gradle", tag: "Native Builds" },
+			{ name: "WebSockets & REST", tag: "Real-Time I/O" },
+		],
+	},
+];
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+	{
+		categories.map((category) => (
+			<div class="flex flex-col space-y-4">
+				<div class="flex items-center gap-2 pb-2.5 border-b border-white/10">
+					<span class="font-mono text-xs text-white/30">
+						{category.number}
+					</span>
+					<h3 class="font-mono text-xs uppercase tracking-widest text-white/80 font-medium">
+						{category.title}
+					</h3>
+				</div>
+
+				<div class="flex flex-wrap gap-2 sm:gap-2.5">
+					{category.skills.map((skill) => (
+						<div class="group inline-flex items-center gap-2 rounded-pill border border-white/10 bg-white/[0.02] px-3.5 py-1.5 text-xs transition-all duration-200 hover:border-white/30 hover:bg-white/[0.05]">
+							<span class="h-1.5 w-1.5 rounded-full bg-white/20 transition-colors duration-200 group-hover:bg-white" />
+							<span class="font-medium text-white/90 transition-colors duration-200 group-hover:text-white">
+								{skill.name}
+							</span>
+							{skill.tag && (
+								<span class="border-l border-white/10 pl-2 font-mono text-[10px] text-white/35 transition-colors duration-200 group-hover:text-white/60">
+									{skill.tag}
+								</span>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+		))
+	}
+</div>

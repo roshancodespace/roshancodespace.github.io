@@ -1,0 +1,152 @@
+---
+const currentPath = Astro.url.pathname;
+
+const linkClass = (path: string) => {
+	const isActive =
+		path === "/"
+			? currentPath === "/"
+			: currentPath === path || currentPath.startsWith(`${path}/`);
+	return isActive
+		? "text-white"
+		: "text-white/40 transition-colors hover:text-white";
+};
+---
+
+<header class="fixed left-0 right-0 top-0 z-50 mx-auto px-6 sm:px-10 py-6">
+	<div class="flex items-center justify-between">
+		<a
+			href="/"
+			aria-label="Home"
+			class="font-semibold uppercase tracking-tight text-white"
+		>
+			Roshan Kumar
+		</a>
+
+		<nav class="hidden items-center gap-6 text-sm md:flex">
+			<a href="/" class={linkClass("/")}>Home</a>
+			<a href="/projects" class={linkClass("/projects")}>Projects</a>
+			<a href="/blog" class={linkClass("/blog")}>Blog</a>
+			<a href="/about" class={linkClass("/about")}> About </a>
+		</nav>
+
+		<button
+			id="nav-toggle"
+			type="button"
+			aria-expanded="false"
+			aria-label="Toggle navigation"
+			class="group flex items-center gap-2 md:hidden"
+		>
+			<span class="text-xs tabular-nums text-white/30">01</span>
+
+			<span class="relative flex h-5 w-5 items-center justify-center">
+				<span
+					id="line-one"
+					class="absolute h-px w-4 bg-white transition-all duration-300 -translate-y-1"
+				></span>
+
+				<span
+					id="line-two"
+					class="absolute h-px w-4 bg-white transition-all duration-300 translate-y-1"
+				></span>
+			</span>
+		</button>
+	</div>
+</header>
+
+<div
+	id="mobile-nav"
+	class="fixed inset-0 z-40 flex flex-col justify-between bg-black/95 backdrop-blur-2xl px-6 sm:px-10 pt-28 pb-10 opacity-0 pointer-events-none transition-all duration-300 md:hidden"
+>
+	<nav class="my-auto flex flex-col gap-6">
+		<a href="/" class={`mobile-link ${linkClass("/")}`}>
+			<span class="text-xs font-mono text-white/30">01</span>
+			<span class="text-3xl font-medium tracking-tight">Home</span>
+		</a>
+
+		<a href="/projects" class={`mobile-link ${linkClass("/projects")}`}>
+			<span class="text-xs font-mono text-white/30">02</span>
+			<span class="text-3xl font-medium tracking-tight">Projects</span>
+		</a>
+
+		<a href="/blog" class={`mobile-link ${linkClass("/blog")}`}>
+			<span class="text-xs font-mono text-white/30">03</span>
+			<span class="text-3xl font-medium tracking-tight">Blog</span>
+		</a>
+
+		<a href="/about" class={`mobile-link ${linkClass("/about")}`}>
+			<span class="text-xs font-mono text-white/30">04</span>
+			<span class="text-3xl font-medium tracking-tight">About</span>
+		</a>
+	</nav>
+
+	<div
+		class="flex items-center justify-between border-t border-white/10 pt-6 text-xs text-white/40"
+	>
+		<span>Roshan Kumar</span>
+		<a
+			href="https://github.com/roshancodespace"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="transition-colors hover:text-white"
+		>
+			github.com/roshancodespace &nearr;
+		</a>
+	</div>
+</div>
+
+<style>
+	.mobile-link {
+		display: flex;
+		align-items: baseline;
+		gap: 1.25rem;
+		transition:
+			transform 200ms ease,
+			color 200ms ease;
+	}
+
+	.mobile-link:hover {
+		transform: translateX(6px);
+	}
+</style>
+
+<script>
+	const toggle = document.querySelector("#nav-toggle");
+	const nav = document.querySelector("#mobile-nav");
+	const lineOne = document.querySelector("#line-one");
+	const lineTwo = document.querySelector("#line-two");
+
+	const setOpen = (open: boolean) => {
+		toggle?.setAttribute("aria-expanded", String(open));
+
+		if (open) {
+			nav?.classList.remove("opacity-0", "pointer-events-none");
+			nav?.classList.add("opacity-100", "pointer-events-auto");
+			document.body.classList.add("overflow-hidden");
+
+			lineOne?.classList.remove("-translate-y-1");
+			lineOne?.classList.add("translate-y-0", "rotate-45");
+
+			lineTwo?.classList.remove("translate-y-1");
+			lineTwo?.classList.add("translate-y-0", "-rotate-45");
+		} else {
+			nav?.classList.add("opacity-0", "pointer-events-none");
+			nav?.classList.remove("opacity-100", "pointer-events-auto");
+			document.body.classList.remove("overflow-hidden");
+
+			lineOne?.classList.remove("translate-y-0", "rotate-45");
+			lineOne?.classList.add("-translate-y-1");
+
+			lineTwo?.classList.remove("translate-y-0", "-rotate-45");
+			lineTwo?.classList.add("translate-y-1");
+		}
+	};
+
+	toggle?.addEventListener("click", () => {
+		const isOpen = toggle.getAttribute("aria-expanded") === "true";
+		setOpen(!isOpen);
+	});
+
+	nav?.querySelectorAll("a").forEach((link) => {
+		link.addEventListener("click", () => setOpen(false));
+	});
+</script>

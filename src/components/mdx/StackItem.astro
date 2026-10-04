@@ -1,0 +1,20 @@
+---
+interface Props {
+	name: string;
+	role: string;
+}
+
+const { name, role } = Astro.props;
+---
+
+<div
+	class="flex flex-col justify-between gap-2 py-3.5 sm:flex-row sm:items-baseline"
+>
+	<div class="min-w-[160px]">
+		<span class="font-medium text-white/90">{name}</span>
+		<span class="block text-xs text-white/35">{role}</span>
+	</div>
+	<div class="text-sm leading-relaxed text-white/55 sm:max-w-md">
+		<slot />
+	</div>
+</div>

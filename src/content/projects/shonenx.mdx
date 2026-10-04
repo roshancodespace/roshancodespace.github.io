@@ -1,0 +1,89 @@
+---
+title: "ShonenX"
+tagline: "Cross-platform anime and manga client built because Electron wrappers suck."
+description: "An open-source desktop and mobile app built out of frustration with 2GB Electron clients and sketchy streaming sites. Uses media_kit (libmpv) for smooth playback, syncs with AniList/MAL, and has zero ads."
+category: "Desktop & Mobile"
+year: "2024 — Present"
+role: "Creator & Maintainer"
+status: "Active · Open Source"
+
+order: 10
+featured: true
+
+image: "/images/projects/shonenx.jpg"
+cardLayout: split
+accentColor: "#10b981"
+
+githubUrl: "https://github.com/roshancodespace/ShonenX"
+stars: 347
+forks: 46
+languages: ["Dart", "Flutter"]
+
+specs:
+  - label: "Platforms"
+    value: "Android, Linux, Windows, macOS"
+  - label: "Playback Engine"
+    value: "media_kit (libmpv)"
+  - label: "State Management"
+    value: "Riverpod"
+  - label: "Local Storage"
+    value: "Isar Database (NoSQL)"
+
+previewSnippet:
+  lang: dart
+  code: |
+    final playerProvider = StateNotifierProvider<PlayerNotifier, PlayerState>((ref) {
+      final engine = ref.watch(mediaKitPlayerProvider);
+      return PlayerNotifier(engine, sourceBridge: ref.watch(bridgeProvider));
+    });
+---
+
+## Overview & Motivation
+
+If you've ever tried watching anime or reading manga on a computer or phone, you know the drill: your choices are either an abandoned Electron wrapper eating 2GB of idle RAM, or third-party streaming sites that open three popups for every play click.
+
+I wanted something clean, snappy, and AMOLED-dark that actually treats your hardware with respect. An app that compiles to native code, runs smoothly on a budget phone or a Linux laptop without heating it up like a griddle, and doesn't inject telemetry or ads into your face.
+
+ShonenX handles seamless watch and read tracking with AniList and MyAnimeList, lets you download episodes for commutes, and keeps media scrapers completely isolated via a modular extension system so the app stays fast and clean.
+
+## Architecture & Decisions
+
+The app is built around keeping heavy playback and network operations from stuttering the reactive UI layer.
+
+<Point title="Solid Video Playback via media_kit">
+Default video player packages in Flutter choke hard on complex SSA/ASS anime subtitles and custom audio tracks. Instead of fighting platform webviews, I used `media_kit`. It delegates video decoding, hardware acceleration, and subtitle rendering to `libmpv` under the hood so playback just works.
+</Point>
+
+<Point title="Decoupled Extension Architecture">
+Hardcoding scrapers directly into an app is a recipe for maintenance nightmare. Built a sandboxed extension runtime so community sources can be updated independently without having to push a full client update every time a website changes a CSS class.
+</Point>
+
+<Point title="Offline-First Caching with Isar">
+Used Isar NoSQL for instantaneous local queries on watch history, tracking queues, and downloaded chapters. If your Wi-Fi drops mid-transit, the app doesn't leave you staring at a dead white screen.
+</Point>
+
+## Engineering Challenges
+
+<Challenge title="Memory Spikes on Rapid Video Scrubbing">
+  <Problem>Aggressively seeking high-bitrate video streams on low-end Android devices would rapidly spike RAM usage and desync audio until Android's low-memory killer killed the process.</Problem>
+  <Solution>Tuned mpv buffer limits, configured aggressive frame-dropping under memory pressure, and piped decoded video textures straight into Flutter's texture registry.</Solution>
+</Challenge>
+
+<Challenge title="Tracking Sync Conflicts">
+  <Problem>Handling expired tokens and diverging watch progress across AniList and MyAnimeList simultaneously without accidentally overwriting newer progress.</Problem>
+  <Solution>Wrote an optimistic offline mutation queue with idempotency keys and exponential backoff retry logic that reconciles tracking quietly when connection resumes.</Solution>
+</Challenge>
+
+## Stack & Rationale
+
+<Stack>
+  <StackItem name="Flutter & Dart" role="Cross-Platform Core">One codebase delivering genuine 60-120fps across mobile and desktop without spinning up a hidden browser instance.</StackItem>
+  <StackItem name="media_kit" role="Video Playback">Wraps libmpv to handle hardware acceleration, tricky anime codecs, and styled subtitles without tears.</StackItem>
+  <StackItem name="Riverpod" role="State Management">Compile-safe, testable state management that doesn't descend into spaghetti as features grow.</StackItem>
+  <StackItem name="Isar DB" role="Persistence">Blazing fast embedded database with zero JSON serialization overhead.</StackItem>
+</Stack>
+
+## What I Learned
+
+- Building for hundreds of active open-source users will teach you very quickly that edge cases you thought were impossible happen every single Tuesday.
+- State management and buffer tuning matter far more than flashy UI tricks when building a video app for low-end mobile devices.

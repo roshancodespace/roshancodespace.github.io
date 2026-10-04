@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SkillTree from "../components/SkillTree.astro";
+---
+
+<BaseLayout
+	title="About — Roshan Kumar"
+	description="Background, philosophy, and technical focus of Roshan Kumar."
+>
+	<div class="mx-auto max-w-4xl px-6 pt-32 pb-32 sm:px-10">
+		<header class="mb-14 space-y-3">
+			<span
+				class="font-mono text-xs uppercase tracking-widest text-white/30 block"
+			>
+				Profile // About
+			</span>
+			<h1
+				class="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+			>
+				I build software that respects your hardware.
+			</h1>
+			<p class="text-base text-white/50 leading-relaxed max-w-2xl">
+				CS student, open-source maintainer, and tinkerer. Focused on
+				native performance, clean architectures, and zero-bullshit
+				engineering.
+			</p>
+		</header>
+
+		<div class="space-y-12 text-base leading-relaxed text-white/60">
+			<section class="space-y-4">
+				<h2 class="text-xl font-medium tracking-tight text-white">
+					The Backstory
+				</h2>
+				<p>
+					Most of my projects start with a moment of pure annoyance.
+					I'll be using an app on my Linux laptop or phone, notice it
+					takes 5 seconds to respond to a click or burns through
+					battery while sitting idle, and decide that whatever problem
+					it's solving can be done significantly better with native
+					code and actual optimization.
+				</p>
+				<p>
+					That attitude led to <a
+						href="/projects/shonenx"
+						class="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+						>ShonenX</a
+					>, an open-source media discovery client that compiles
+					natively to Dart and delegates playback to <code
+						class="text-white/80 bg-white/5 px-1.5 py-0.5 rounded-code text-sm font-mono"
+						>libmpv</code
+					> instead of spinning up an Electron instance. It also drove me
+					to write <a
+						href="/projects/byte-me"
+						class="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+						>byte_me</a
+					> when default Flutter download packages kept stuttering the UI
+					on 500MB media files.
+				</p>
+			</section>
+
+			<section class="space-y-4">
+				<h2 class="text-xl font-medium tracking-tight text-white">
+					What I Care About
+				</h2>
+				<ul class="space-y-3">
+					<li class="flex items-start gap-3">
+						<span class="mt-2 h-1 w-1 bg-white/40 shrink-0"></span>
+						<span
+							><strong class="text-white font-medium"
+								>Native compilation over web wrappers:</strong
+							> Electron and Tauri have their place, but native Dart/Flutter
+							or compiled systems software will always win on battery,
+							RAM, and tactile responsiveness.</span
+						>
+					</li>
+					<li class="flex items-start gap-3">
+						<span class="mt-2 h-1 w-1 bg-white/40 shrink-0"></span>
+						<span
+							><strong class="text-white font-medium"
+								>Privacy and zero telemetry:</strong
+							> No tracking SDKs, no third-party ad networks, no analytics
+							beacons watching what users click.</span
+						>
+					</li>
+					<li class="flex items-start gap-3">
+						<span class="mt-2 h-1 w-1 bg-white/40 shrink-0"></span>
+						<span
+							><strong class="text-white font-medium"
+								>Tinkering with system internals:</strong
+							> Bypassing Android Scoped Storage with Shizuku, playing
+							with kernel Binder IPC, and figuring out how things work
+							under the hood.</span
+						>
+					</li>
+				</ul>
+			</section>
+
+			<section class="space-y-6 pt-6 border-t border-white/10">
+				<div>
+					<h2 class="text-xl font-medium tracking-tight text-white">
+						Skill Tree
+					</h2>
+					<p class="mt-1 text-sm text-white/40">
+						Core competencies and areas of active exploration.
+					</p>
+				</div>
+				<SkillTree />
+			</section>
+
+			<section
+				class="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-sm text-white/40"
+			>
+				<span>Interested in collaborating or talking systems?</span>
+				<a
+					href="https://github.com/roshancodespace"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-white hover:underline transition-colors"
+				>
+					github.com/roshancodespace &nearr;
+				</a>
+			</section>
+		</div>
+	</div>
+</BaseLayout>

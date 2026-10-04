@@ -1,0 +1,87 @@
+---
+title: "wuwa_fx"
+tagline: "Rootless in-game config and shader cache tweaker for Wuthering Waves on Android."
+description: "An Android utility built because Wuthering Waves ran terribly on mobile and Android 11+ locked down the /data folder. Uses Shizuku to bypass Scoped Storage without root, tweak Unreal Engine ini files, and nuke stale shader caches."
+category: "Android Tool"
+year: "2024 — Present"
+role: "Creator"
+status: "Active · Open Source"
+
+order: 40
+featured: true
+
+accentColor: "#3b82f6"
+
+githubUrl: "https://github.com/roshancodespace/wuwa_fx"
+languages: ["Flutter", "Dart", "Shizuku API", "Android"]
+
+specs:
+  - label: "Target"
+    value: "Wuthering Waves (Android / Unreal Engine 4)"
+  - label: "Privileges"
+    value: "Rootless ADB via Shizuku Service"
+  - label: "Features"
+    value: "Folder tree navigation & forced shader recompiles"
+  - label: "Sync"
+    value: "Custom remote GitHub preset repo support"
+
+previewSnippet:
+  lang: dart
+  code: |
+    final shizuku = ShizukuService();
+    final wuwaData = await shizuku.accessDir('/data/data/com.kurogame.wutheringwaves');
+    await wuwaData.applyConfig(treeHierarchy, forceRecompile: true);
+---
+
+## Overview & Motivation
+
+When Wuthering Waves launched on mobile, performance was... rough. Aggressive dynamic resolution scaling constantly turned character models into a blurry watercolor painting, and frame pacing was all over the place.
+
+The game runs on Unreal Engine, which means tweaking a few lines in `Engine.ini` and `GameUserSettings.ini` fixes half the problems. There was just one massive roadblock: Android 11+ locked down the internal `/data` and `/Android/data` folders behind Scoped Storage. If you wanted to tweak an ini file, your choices were: root your device (and break all your banking apps), or connect your phone to a PC with a USB cable and run ADB commands every single time.
+
+I built `wuwa_fx` so players can tweak in-game configs directly on their phone without root. It uses Shizuku to acquire elevated ADB permissions, presents an interactive folder tree of the game's data, lets you pull community presets from GitHub, and forces shader recompilations when Unreal Engine decides to be stubborn.
+
+## Architecture & Decisions
+
+Designed around rootless privilege escalation and safe config replacement.
+
+<Point title="Rootless Access via Shizuku Binder IPC">
+Instead of requiring root binaries or dangerous su permissions, the app communicates with the running Shizuku system service over Android's Binder IPC. This grants elevated ADB-level file reading and writing inside the protected app package container without voiding warranties or tripping SafetyNet.
+</Point>
+
+<Point title="Interactive Folder Tree Browser">
+Rather than blindly overwriting files with a one-click button, the app renders a full hierarchical folder tree so you can preview, backup, and restore individual config files before applying experimental tweaks.
+</Point>
+
+<Point title="Forced Shader Recompile Invalidator">
+Unreal Engine on Android frequently ignores modified graphics variables if it detects existing compiled shader caches. Built a targeted cache invalidator that wipes stale shader markers, forcing the engine to compile fresh shaders on next boot.
+</Point>
+
+<Point title="Single GitHub Repo Sync">
+Shipped with a curated community preset list by default, but allows users to punch in any custom GitHub repository link to fetch and test community configs on the fly.
+</Point>
+
+## Engineering Challenges
+
+<Challenge title="Scoped Storage Lockout on Modern Android">
+  <Problem>Android treats its users like children and forbids regular file managers from viewing or editing anything inside `/Android/data` or `/data/data`.</Problem>
+  <Solution>Wrote an IPC bridge to Shizuku's privileged process, allowing the Flutter UI to stream file operations through system-level ADB authorization.</Solution>
+</Challenge>
+
+<Challenge title="Unreal Engine Stale Shader Caches">
+  <Problem>Users would apply high-resolution configs, but in-game graphics looked identical because the engine was quietly running cached pre-compiled shader blobs.</Problem>
+  <Solution>Discovered the cache signature file Unreal checks on boot and built an automated routine to invalidate it whenever an ini file is modified.</Solution>
+</Challenge>
+
+## Stack & Rationale
+
+<Stack>
+  <StackItem name="Flutter & Dart" role="Mobile Framework">Quick way to build a responsive mobile file browser with custom tree views and smooth animations.</StackItem>
+  <StackItem name="Shizuku" role="System IPC">The gold standard for rootless elevated permissions on modern Android.</StackItem>
+  <StackItem name="GitHub API" role="Presets">Pulls raw community configuration trees without needing a dedicated backend server.</StackItem>
+</Stack>
+
+## What I Learned
+
+- Mobile game engines will happily ignore your config edits unless you pay attention to how their shader caching pipeline works.
+- Android Scoped Storage is frustrating for modders, but tools like Shizuku prove you can build powerful developer utilities without forcing people to root their daily-driver phones.

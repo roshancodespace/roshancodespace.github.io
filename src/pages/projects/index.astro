@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectGrid from "../../components/ProjectGrid.astro";
+import { getAllProjects } from "../../lib/projects";
+
+const allProjects = await getAllProjects();
+---
+
+<BaseLayout
+	title="Projects — Roshan Kumar"
+	description="Open-source applications, tools, and libraries built by Roshan Kumar."
+>
+	<div class="mx-auto max-w-7xl px-6 pt-32 pb-32 sm:px-10">
+		<header class="mb-12 space-y-2">
+			<h1
+				class="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+			>
+				Projects
+			</h1>
+			<p class="text-sm text-white/50">
+				Open-source applications, tools, and systems software.
+			</p>
+		</header>
+
+		<section>
+			<ProjectGrid projects={allProjects} />
+		</section>
+
+		<footer
+			class="mt-28 border-t border-white/10 pt-10 flex items-baseline justify-between text-xs text-white/40"
+		>
+			<span>{allProjects.length} projects</span>
+			<a
+				href="https://github.com/roshancodespace"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="hover:text-white transition-colors"
+			>
+				github.com/roshancodespace &nearr;
+			</a>
+		</footer>
+	</div>
+</BaseLayout>

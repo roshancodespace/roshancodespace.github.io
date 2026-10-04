@@ -1,0 +1,84 @@
+<div class="project-prose text-base leading-relaxed text-white/60">
+	<slot />
+</div>
+
+<style>
+	.project-prose {
+		counter-reset: section;
+	}
+	.project-prose > :global(* + *) {
+		margin-top: calc(var(--spacing) * 4);
+	}
+	.project-prose > :global(h2) {
+		counter-increment: section;
+		display: flex;
+		align-items: baseline;
+		gap: calc(var(--spacing) * 3);
+		font-size: 1.25rem;
+		line-height: 1.75rem;
+		font-weight: 500;
+		letter-spacing: calc(var(--tracking-normal) - 0.025em);
+		color: #fff;
+	}
+	.project-prose > :global(h2::before) {
+		content: counter(section, decimal-leading-zero);
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: rgb(255 255 255 / 30%);
+	}
+	.project-prose > :global(* + h2) {
+		margin-top: calc(var(--spacing) * 16);
+	}
+	.project-prose > :global(h2 + *) {
+		margin-top: calc(var(--spacing) * 5);
+	}
+	.project-prose > :global(.mdx-block + .mdx-block) {
+		margin-top: calc(var(--spacing) * 8);
+	}
+	.project-prose > :global(p + .mdx-block) {
+		margin-top: calc(var(--spacing) * 6);
+	}
+	.project-prose > :global(ul) {
+		list-style: none;
+		padding: 0;
+	}
+	.project-prose > :global(ul > li) {
+		display: flex;
+		align-items: flex-start;
+		gap: calc(var(--spacing) * 3);
+	}
+	.project-prose > :global(ul > li + li) {
+		margin-top: calc(var(--spacing) * 2.5);
+	}
+	.project-prose > :global(ul > li::before) {
+		content: "";
+		flex-shrink: 0;
+		margin-top: 0.7em;
+		width: calc(var(--spacing) * 1);
+		height: calc(var(--spacing) * 1);
+		background: rgb(255 255 255 / 40%);
+	}
+	.project-prose :global(code) {
+		font-family: var(--font-mono);
+		font-size: 0.875em;
+		color: rgb(255 255 255 / 80%);
+		background: rgb(255 255 255 / 5%);
+		padding: 0.15em 0.35em;
+		border-radius: var(--radius-code);
+	}
+	.project-prose :global(pre) {
+		border-radius: var(--radius-card);
+		border: 1px solid rgb(255 255 255 / 10%);
+		overflow: hidden;
+	}
+	.project-prose :global(a) {
+		color: #fff;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		text-decoration-color: rgb(255 255 255 / 30%);
+	}
+	.project-prose :global(strong) {
+		font-weight: 500;
+		color: rgb(255 255 255 / 85%);
+	}
+</style>

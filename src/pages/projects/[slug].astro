@@ -1,0 +1,167 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectProse from "../../components/mdx/ProjectProse.astro";
+import { mdxComponents } from "../../components/mdx";
+import { getAllProjects, type Project } from "../../lib/projects";
+
+export async function getStaticPaths() {
+	const allProjects = await getAllProjects();
+
+	return allProjects.map((entry, index) => {
+		const prev =
+			index > 0
+				? allProjects[index - 1]
+				: allProjects[allProjects.length - 1];
+		const next =
+			index < allProjects.length - 1
+				? allProjects[index + 1]
+				: allProjects[0];
+
+		return {
+			params: { slug: entry.id },
+			props: { entry, prev, next },
+		};
+	});
+}
+
+interface Props {
+	entry: Project;
+	prev: Project;
+	next: Project;
+}
+
+const { entry, prev, next } = Astro.props;
+const project = entry.data;
+const { Content } = await render(entry);
+---
+
+<BaseLayout
+	title={`${project.title} — Roshan Kumar`}
+	description={project.description}
+>
+	<article class="mx-auto max-w-3xl px-6 pt-32 pb-32 sm:px-10">
+		<nav class="mb-12">
+			<a
+				href="/projects"
+				class="text-xs uppercase tracking-wider text-white/40 transition-colors hover:text-white"
+			>
+				&larr; All Projects
+			</a>
+		</nav>
+
+		<header class="space-y-4">
+			<p
+				class="text-xs font-medium uppercase tracking-widest text-white/40"
+			>
+				{project.category} &middot; {project.year}
+			</p>
+
+			<h1
+				class="text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+			>
+				{project.title}
+			</h1>
+
+			<p class="text-lg leading-relaxed text-white/60 sm:text-xl">
+				{project.tagline}
+			</p>
+
+			<div
+				class="pt-8 pb-10 border-b border-white/10 grid grid-cols-2 gap-y-6 gap-x-8 text-sm sm:grid-cols-4"
+			>
+				<div>
+					<span
+						class="text-xs text-white/35 uppercase tracking-wider block"
+					>
+						Role
+					</span>
+					<span class="mt-1 text-white/90 block font-medium">
+						{project.role}
+					</span>
+				</div>
+				<div>
+					<span
+						class="text-xs text-white/35 uppercase tracking-wider block"
+					>
+						Stack
+					</span>
+					<span class="mt-1 text-white/90 block">
+						{project.languages.join(", ")}
+					</span>
+				</div>
+				<div>
+					<span
+						class="text-xs text-white/35 uppercase tracking-wider block"
+					>
+						Timeline
+					</span>
+					<span class="mt-1 text-white/90 block">
+						{project.year}
+					</span>
+				</div>
+				<div>
+					<span
+						class="text-xs text-white/35 uppercase tracking-wider block"
+					>
+						Source
+					</span>
+					{
+						project.githubUrl ? (
+							<a
+								href={project.githubUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="mt-1 text-white hover:underline block font-medium"
+							>
+								GitHub &nearr;
+							</a>
+						) : (
+							<span class="mt-1 text-white/40 block">
+								Open Source
+							</span>
+						)
+					}
+				</div>
+			</div>
+		</header>
+
+		{
+			project.image && (
+				<div class="my-12 flex items-center justify-center overflow-hidden rounded-card bg-white/[0.02] border border-white/10 p-4 max-h-[560px]">
+					<img
+						src={project.image}
+						alt={project.title}
+						class="max-h-[520px] w-auto max-w-full rounded-media object-contain"
+					/>
+				</div>
+			)
+		}
+
+		<div class="mt-14">
+			<ProjectProse>
+				<Content components={mdxComponents} />
+			</ProjectProse>
+		</div>
+
+		<footer
+			class="mt-24 border-t border-white/10 pt-10 flex items-baseline justify-between text-sm"
+		>
+			<a
+				href={`/projects/${prev.id}`}
+				class="text-white/40 hover:text-white transition-colors flex items-center gap-2"
+			>
+				<span>&larr;</span>
+				<span>{prev.data.title}</span>
+			</a>
+
+			<a
+				href={`/projects/${next.id}`}
+				class="text-white/40 hover:text-white transition-colors flex items-center gap-2"
+			>
+				<span>{next.data.title}</span>
+				<span>&rarr;</span>
+			</a>
+		</footer>
+	</article>
+</BaseLayout>

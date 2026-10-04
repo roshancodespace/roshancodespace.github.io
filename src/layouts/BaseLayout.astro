@@ -1,0 +1,36 @@
+---
+import Navbar from "./Navbar.astro";
+import Footer from "./Footer.astro";
+import AnimePet from "../components/AnimePet.astro";
+import "../styles/global.css";
+
+interface Props {
+    title: string;
+    description?: string;
+    className?: string;
+}
+
+const {
+    title,
+    description = "Roshan Kumar — Developer and creator.",
+    className = "",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="description" content={description} />
+        <title>{title}</title>
+    </head>
+    <body>
+        <Navbar />
+        <main class={className}>
+            <slot />
+        </main>
+        <Footer />
+        <AnimePet />
+    </body>
+</html>

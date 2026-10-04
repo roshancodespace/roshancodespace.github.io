@@ -1,17 +1,283 @@
 ---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import SkillTree from "../components/SkillTree.astro";
+import { getFeaturedProjects } from "../lib/projects";
 
+const featuredProjects = await getFeaturedProjects();
+const recentPosts = (await getCollection("blog"))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 3);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Roshan Kumar — Developer & Builder">
+	<section
+		class="relative mx-auto max-w-7xl grid min-h-screen grid-cols-1 items-center gap-16 py-16 md:grid-cols-3"
+	>
+		<div class="space-y-7 md:col-span-2 px-6 sm:px-10">
+			<div class="space-y-3">
+				<p
+					class="text-sm font-medium uppercase tracking-widest text-white/40 font-mono"
+				>
+					Developer &middot; Student &middot; Builder
+				</p>
+
+				<h1
+					class="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl text-white"
+				>
+					I build software.
+					<br />
+					And figure out
+					<br />
+					what makes it work.
+				</h1>
+			</div>
+
+			<p
+				class="max-w-xl text-base leading-relaxed text-white/55 sm:text-lg"
+			>
+				Computer science student and open-source builder. I like
+				software that starts instantly, respects memory, and doesn't get
+				in your way.
+			</p>
+		</div>
+
+		<div class="max-w-xs space-y-5 px-6 sm:px-10 md:px-0">
+			<div>
+				<p
+					class="text-xs uppercase tracking-widest text-white/35 font-mono"
+				>
+					Currently building
+				</p>
+
+				<a
+					href="/projects/shonenx"
+					class="mt-2 block font-medium text-white/90 hover:text-white transition-colors text-sm"
+				>
+					ShonenX &middot; Flutter &middot; Open Source
+				</a>
+			</div>
+
+			<div class="h-px w-12 bg-white/20"></div>
+
+			<p class="text-sm leading-relaxed text-white/40">
+				Building things. Breaking assumptions. Figuring out what makes
+				them work.
+			</p>
+		</div>
+	</section>
+
+	<section
+		id="projects"
+		class="mx-auto max-w-7xl px-6 sm:px-10 py-24 border-t border-white/10"
+	>
+		<header
+			class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+		>
+			<div>
+				<span
+					class="font-mono text-xs uppercase tracking-widest text-white/30 block mb-1"
+				>
+					01 // Work
+				</span>
+				<h2
+					class="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+				>
+					Featured Projects
+				</h2>
+			</div>
+			<a
+				href="/projects"
+				class="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1 font-mono uppercase tracking-wider"
+			>
+				<span>All Projects ({featuredProjects.length})</span>
+				<span>&rarr;</span>
+			</a>
+		</header>
+
+		<ProjectGrid projects={featuredProjects} />
+	</section>
+
+	<section
+		id="about"
+		class="mx-auto max-w-7xl px-6 sm:px-10 py-24 border-t border-white/10"
+	>
+		<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+			<div class="lg:col-span-4">
+				<span
+					class="font-mono text-xs uppercase tracking-widest text-white/30 block mb-1"
+				>
+					02 // Profile
+				</span>
+				<h2
+					class="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+				>
+					About Me
+				</h2>
+				<p class="mt-2 text-sm text-white/40">
+					The philosophy behind the code.
+				</p>
+			</div>
+
+			<div
+				class="lg:col-span-8 space-y-6 text-base leading-relaxed text-white/60"
+			>
+				<p>
+					I build software mostly because bad software annoys me. We
+					live in an era of 16-core CPUs and gigabytes of memory, yet
+					everyday desktop apps routinely choke on basic tasks because
+					someone decided to wrap three web browsers inside an
+					Electron bundle just to render a couple of lists.
+				</p>
+
+				<p>
+					I prefer the opposite: writing code that compiles natively,
+					stays responsive on budget hardware, and doesn't treat your
+					phone battery like an open flame. That mindset is what led
+					me to build <a
+						href="/projects/shonenx"
+						class="text-white underline underline-offset-4 decoration-white/30 hover:decoration-white transition-colors"
+						>ShonenX</a
+					>, an open-source media client used by hundreds of people
+					that delegates heavy playback to <code
+						class="text-white/80 bg-white/5 px-1.5 py-0.5 rounded-code text-sm font-mono"
+						>libmpv</code
+					> instead of fighting platform webviews.
+				</p>
+
+				<p>
+					When I'm not maintaining apps, I'm usually digging through
+					system internals—whether that's writing multi-isolate
+					chunked downloaders in Dart, bypassing Android's Scoped
+					Storage with Shizuku to tweak Unreal Engine game configs, or
+					testing out local LLM agent loops.
+				</p>
+
+				<div
+					class="pt-4 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs border-t border-white/5"
+				>
+					<div>
+						<span
+							class="text-white/30 block uppercase tracking-wider font-mono"
+							>Focus</span
+						>
+						<span class="text-white/80 font-medium mt-1 block"
+							>Cross-Platform Systems</span
+						>
+					</div>
+					<div>
+						<span
+							class="text-white/30 block uppercase tracking-wider font-mono"
+							>Status</span
+						>
+						<span class="text-white/80 font-medium mt-1 block"
+							>CS Student & Builder</span
+						>
+					</div>
+					<div>
+						<span
+							class="text-white/30 block uppercase tracking-wider font-mono"
+							>Location</span
+						>
+						<span class="text-white/80 font-medium mt-1 block"
+							>India &middot; Remote</span
+						>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section
+		id="skills"
+		class="mx-auto max-w-7xl px-6 sm:px-10 py-24 border-t border-white/10"
+	>
+		<header class="mb-12">
+			<span
+				class="font-mono text-xs uppercase tracking-widest text-white/30 block mb-1"
+			>
+				03 // Stack
+			</span>
+			<h2
+				class="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+			>
+				Skill Tree
+			</h2>
+			<p class="mt-2 text-sm text-white/40">
+				Languages, frameworks, and system tools I work with daily.
+			</p>
+		</header>
+
+		<SkillTree />
+	</section>
+
+	{
+		recentPosts.length > 0 && (
+			<section
+				id="writings"
+				class="mx-auto max-w-7xl px-6 sm:px-10 py-24 border-t border-white/10"
+			>
+				<header class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+					<div>
+						<span class="font-mono text-xs uppercase tracking-widest text-white/30 block mb-1">
+							04 // Notes
+						</span>
+						<h2 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+							Recent Writings
+						</h2>
+						<p class="mt-2 text-sm text-white/40">
+							Technical deep-dives and engineering postmortems.
+						</p>
+					</div>
+					<a
+						href="/blog"
+						class="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1 font-mono uppercase tracking-wider"
+					>
+						<span>All Writings</span>
+						<span>&rarr;</span>
+					</a>
+				</header>
+
+				<div class="divide-y divide-white/10 border-y border-white/10">
+					{recentPosts.map((post) => (
+						<a
+							href={`/blog/${post.id}`}
+							class="group block py-6 transition-colors hover:text-white"
+						>
+							<div class="flex items-center justify-between text-xs text-white/40">
+								<time
+									datetime={post.data.pubDate.toISOString()}
+								>
+									{post.data.pubDate.toLocaleDateString(
+										"en-US",
+										{
+											month: "short",
+											day: "numeric",
+											year: "numeric",
+										},
+									)}
+								</time>
+								<div class="flex items-center gap-2">
+									{post.data.tags.map((tag) => (
+										<span class="rounded-tag bg-white/5 px-2 py-0.5 text-[10px] text-white/60">
+											{tag}
+										</span>
+									))}
+								</div>
+							</div>
+
+							<h3 class="mt-2 text-lg font-medium tracking-tight text-white/90 group-hover:text-white transition-colors">
+								{post.data.title}
+							</h3>
+
+							<p class="mt-1 text-sm text-white/50 leading-relaxed max-w-3xl">
+								{post.data.description}
+							</p>
+						</a>
+					))}
+				</div>
+			</section>
+		)
+	}
+</BaseLayout>

@@ -1,0 +1,447 @@
+---
+interface Props {
+	defaultVisible?: boolean;
+}
+
+const { defaultVisible = true } = Astro.props;
+---
+
+<div
+	id="anime-pet-container"
+	class="pointer-events-none fixed inset-0 z-50 overflow-hidden select-none"
+	aria-hidden="true"
+	data-default-visible={defaultVisible ? "true" : "false"}
+>
+	<div
+		id="anime-pet"
+		class="pointer-events-auto absolute cursor-grab active:cursor-grabbing will-change-transform"
+		style="width: 64px; height: 64px; display: none; touch-action: none;"
+		role="button"
+		tabindex="0"
+		aria-label="Anime Companion"
+	>
+		<div
+			id="anime-pet-img"
+			class="h-full w-full select-none pointer-events-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+			style="background-image: url('/images/chibi/chibi.png'); background-size: 1792px 64px; background-position: 0px 0px; image-rendering: pixelated; transform-origin: bottom center;"
+		>
+		</div>
+
+		<div
+			id="anime-pet-bubble"
+			class="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border-2 border-black bg-white px-2 py-0.5 text-[10px] uppercase font-bold text-black opacity-0 transition-opacity duration-200 shadow-sm"
+			style="image-rendering: pixelated;"
+		>
+			<span id="anime-pet-bubble-text"></span>
+		</div>
+	</div>
+
+	<button
+		id="anime-pet-toggle"
+		class="pointer-events-auto fixed bottom-5 right-5 z-50 flex h-8 w-8 items-center justify-center rounded-pill border border-white/10 bg-black/70 backdrop-blur-md text-xs text-white/50 transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
+		title="Toggle companion"
+		aria-label="Toggle anime companion"
+	>
+		<span id="anime-pet-toggle-icon">&hearts;</span>
+	</button>
+</div>
+
+<script>
+	const SPRITES = {
+		idle: "0px 0px",
+		idle2: "-64px 0px",
+		walk1: "-128px 0px",
+		walk2: "-192px 0px",
+		walk3: "-256px 0px",
+		walk4: "-320px 0px",
+		drag: "-384px 0px",
+		fall: "-448px 0px",
+		blink: "-64px 0px",
+		shake: "-384px 0px",
+		read1: "-512px 0px",
+		read2: "-576px 0px",
+		read3: "-640px 0px",
+		read4: "-704px 0px",
+		sit1: "-768px 0px",
+		sit2: "-832px 0px",
+		sit3: "-896px 0px",
+		sit4: "-960px 0px",
+		sleep1: "-1024px 0px",
+		sleep2: "-1088px 0px",
+		sleep3: "-1152px 0px",
+		sleep4: "-1216px 0px",
+		magic1: "-1280px 0px",
+		magic2: "-1344px 0px",
+		magic3: "-1408px 0px",
+		magic4: "-1472px 0px",
+		mimic1: "-1536px 0px",
+		mimic2: "-1600px 0px",
+		mimic3: "-1664px 0px",
+		mimic4: "-1728px 0px",
+	};
+
+	const EMOTES = ["<3", "hello!", "hmm...", "!", "?", "yay!", "..."];
+
+	function initAnimePet() {
+		const container = document.getElementById("anime-pet-container");
+		const pet = document.getElementById("anime-pet");
+		const imgNode = document.getElementById("anime-pet-img");
+		const img = {
+			set src(val: string) {
+				if (imgNode) imgNode.style.backgroundPosition = val;
+			},
+		};
+		const bubble = document.getElementById("anime-pet-bubble");
+		const bubbleText = document.getElementById("anime-pet-bubble-text");
+		const toggleBtn = document.getElementById("anime-pet-toggle");
+
+		if (
+			!container ||
+			!pet ||
+			!imgNode ||
+			!bubble ||
+			!bubbleText ||
+			!toggleBtn
+		)
+			return;
+
+		let isVisible = localStorage.getItem("anime-pet-visible") !== "false";
+		if (!isVisible) {
+			pet.style.display = "none";
+			toggleBtn.style.opacity = "0.5";
+		} else {
+			pet.style.display = "block";
+			toggleBtn.style.opacity = "1";
+		}
+
+		const petWidth = 64;
+		const petHeight = 64;
+		let groundY = window.innerHeight - petHeight;
+
+		let posX = Math.max(
+			20,
+			Math.min(
+				window.innerWidth - petWidth - 80,
+				window.innerWidth * 0.75,
+			),
+		);
+		let posY = groundY;
+		let velX = 0;
+		let velY = 0;
+		let facing = -1;
+		let targetX = posX;
+
+		let state = "idle";
+		let stateTimer = 0;
+		let walkFrame = 0;
+		let walkTimer = 0;
+		let idleBlinkTimer = 0;
+		let inactivityTimer = 0;
+		let animFrame = 0;
+		let animTimer = 0;
+
+		let isDragging = false;
+		let dragStartX = 0;
+		let dragStartY = 0;
+		let petStartX = 0;
+		let petStartY = 0;
+		let lastPointerX = 0;
+		let lastPointerY = 0;
+		let pointerSpeedX = 0;
+		let hasDragged = false;
+		let bubbleTimer: number | null = null;
+
+		function showBubble(text: string, duration = 1800) {
+			if (!bubble || !bubbleText) return;
+			bubbleText.innerHTML = text;
+			bubble.style.opacity = "1";
+			if (bubbleTimer) clearTimeout(bubbleTimer);
+			bubbleTimer = window.setTimeout(() => {
+				if (bubble) bubble.style.opacity = "0";
+			}, duration);
+		}
+
+		toggleBtn.addEventListener("click", () => {
+			isVisible = !isVisible;
+			localStorage.setItem(
+				"anime-pet-visible",
+				isVisible ? "true" : "false",
+			);
+			if (isVisible) {
+				pet.style.display = "block";
+				toggleBtn.style.opacity = "1";
+				posX = Math.max(
+					20,
+					Math.min(window.innerWidth - petWidth - 30, posX),
+				);
+				posY = groundY;
+				velX = 0;
+				velY = 0;
+				state = "idle";
+				showBubble(EMOTES[0], 1200);
+			} else {
+				pet.style.display = "none";
+				toggleBtn.style.opacity = "0.5";
+			}
+		});
+
+		window.addEventListener("resize", () => {
+			groundY = window.innerHeight - petHeight;
+			if (state !== "fall" && state !== "drag") {
+				posY = groundY;
+			}
+			posX = Math.max(
+				10,
+				Math.min(window.innerWidth - petWidth - 10, posX),
+			);
+		});
+
+		window.addEventListener("pointermove", (e) => {
+			inactivityTimer = 0;
+			if (state === "sleep") {
+				state = "idle";
+				if (bubble) bubble.style.opacity = "0";
+				showBubble("?", 1200);
+			}
+
+			if (isDragging) {
+				const dx = e.clientX - dragStartX;
+				const dy = e.clientY - dragStartY;
+				if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+					hasDragged = true;
+				}
+				posX = Math.max(
+					0,
+					Math.min(window.innerWidth - petWidth, petStartX + dx),
+				);
+				posY = Math.max(
+					0,
+					Math.min(window.innerHeight - petHeight, petStartY + dy),
+				);
+				pointerSpeedX = e.clientX - lastPointerX;
+				lastPointerX = e.clientX;
+				lastPointerY = e.clientY;
+			}
+		});
+
+		pet.addEventListener("pointerdown", (e) => {
+			if (!isVisible) return;
+			isDragging = true;
+			hasDragged = false;
+			state = "drag";
+			dragStartX = e.clientX;
+			dragStartY = e.clientY;
+			petStartX = posX;
+			petStartY = posY;
+			lastPointerX = e.clientX;
+			lastPointerY = e.clientY;
+			pointerSpeedX = 0;
+			velX = 0;
+			velY = 0;
+			img.src = SPRITES.drag;
+			pet.setPointerCapture(e.pointerId);
+		});
+
+		pet.addEventListener("pointerup", (e) => {
+			if (!isDragging) return;
+			isDragging = false;
+			pet.releasePointerCapture(e.pointerId);
+
+			if (!hasDragged) {
+				// Punched!
+				velY = -5;
+				velX = facing * -8; // fly backwards
+				state = "punched";
+				showBubble("ouch!", 1500);
+				img.src = SPRITES.fall;
+			} else {
+				if (posY < groundY - 5) {
+					state = "fall";
+					velY = 0;
+					velX = Math.max(-5, Math.min(5, pointerSpeedX * 0.8));
+					img.src = SPRITES.fall;
+				} else {
+					posY = groundY;
+					state = "idle";
+					img.src = SPRITES.idle;
+				}
+			}
+		});
+
+		let lastTime = performance.now();
+
+		function update(now: number) {
+			if (!pet) return;
+			const dt = Math.min(50, now - lastTime);
+			lastTime = now;
+
+			if (isVisible) {
+				inactivityTimer += dt;
+				if (
+					inactivityTimer > 22000 &&
+					state !== "sleep" &&
+					state !== "drag"
+				) {
+					state = "sleep";
+					animFrame = 0;
+					img.src = SPRITES.sleep1;
+					showBubble("zzz", 999999);
+				}
+
+				if (state === "idle") {
+					idleBlinkTimer += dt;
+					if (idleBlinkTimer > 3500) {
+						img.src = SPRITES.blink;
+						if (idleBlinkTimer > 3750) {
+							img.src = SPRITES.idle;
+							idleBlinkTimer = 0;
+						}
+					} else {
+						img.src = SPRITES.idle;
+					}
+
+					stateTimer += dt;
+					if (stateTimer > 3000 + Math.random() * 4000) {
+						stateTimer = 0;
+						const action = Math.random();
+						if (action < 0.5) {
+							state = "walk";
+							targetX = Math.max(
+								30,
+								Math.min(
+									window.innerWidth - petWidth - 30,
+									Math.random() * (window.innerWidth - 100),
+								),
+							);
+							facing = targetX > posX ? 1 : -1;
+						} else if (action < 0.6) {
+							state = "sit";
+							animFrame = 0;
+							img.src = SPRITES.sit1;
+						} else if (action < 0.7) {
+							state = "read";
+							animFrame = 0;
+							img.src = SPRITES.read1;
+						} else if (action < 0.8) {
+							state = "magic";
+							animFrame = 0;
+							img.src = SPRITES.magic1;
+							showBubble("*magic*", 1500);
+						} else if (action < 0.9) {
+							state = "mimic";
+							animFrame = 0;
+							img.src = SPRITES.mimic1;
+							showBubble("help!", 2000);
+						} else {
+							velY = -5;
+							state = "jump";
+							img.src = SPRITES.blink;
+						}
+					}
+				} else if (state === "walk") {
+					const dx = targetX - posX;
+					const dist = Math.abs(dx);
+					if (dist < 4) {
+						state = "idle";
+						stateTimer = 0;
+						img.src = SPRITES.idle;
+					} else {
+						facing = dx > 0 ? 1 : -1;
+						posX += facing * 1.5;
+						walkTimer += dt;
+						if (walkTimer > 130) {
+							walkTimer = 0;
+							walkFrame = (walkFrame + 1) % 4;
+							if (walkFrame === 0) img.src = SPRITES.walk1;
+							else if (walkFrame === 1) img.src = SPRITES.walk2;
+							else if (walkFrame === 2) img.src = SPRITES.walk3;
+							else img.src = SPRITES.walk4;
+						}
+					}
+				} else if (
+					["sit", "read", "magic", "mimic", "sleep"].includes(state)
+				) {
+					stateTimer += dt;
+					animTimer += dt;
+					if (animTimer > 350) {
+						animTimer = 0;
+						animFrame = (animFrame + 1) % 4;
+						const frameKey = state + (animFrame + 1);
+						// @ts-ignore
+						img.src = SPRITES[frameKey];
+					}
+
+					if (state !== "sleep" && stateTimer > 4000) {
+						state = "idle";
+						stateTimer = 0;
+						img.src = SPRITES.idle;
+					}
+				} else if (state === "jump") {
+					velY += 0.45;
+					posY += velY;
+					if (posY >= groundY) {
+						posY = groundY;
+						velY = 0;
+						state = "idle";
+						img.src = SPRITES.idle;
+					}
+				} else if (state === "fall" || state === "punched") {
+					velY += 0.45;
+					posY += velY;
+					posX += velX;
+					velX *= 0.98;
+					posX = Math.max(
+						10,
+						Math.min(window.innerWidth - petWidth - 10, posX),
+					);
+
+					if (posY >= groundY) {
+						posY = groundY;
+						velY = 0;
+						velX = 0;
+						const wasPunched = state === "punched";
+						state = "idle";
+						img.src = SPRITES.idle;
+						showBubble(wasPunched ? "..." : "plop!", 900);
+					}
+				} else if (state === "drag") {
+					const speed = Math.abs(pointerSpeedX);
+					if (speed > 15) {
+						img.src = SPRITES.shake;
+					} else {
+						img.src = SPRITES.drag;
+					}
+					const tilt = Math.max(
+						-20,
+						Math.min(20, pointerSpeedX * 1.5),
+					);
+					pet.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+					if (imgNode)
+						imgNode.style.transform = `scaleX(${facing}) rotate(${tilt}deg)`;
+				}
+
+				if (state !== "drag") {
+					let extraTransform = "";
+					if (state === "sit") {
+						extraTransform = " translateY(6px) scaleY(0.92)";
+					}
+					pet.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+					if (imgNode)
+						imgNode.style.transform = `scaleX(${facing})${extraTransform}`;
+				}
+			}
+
+			requestAnimationFrame(update);
+		}
+
+		requestAnimationFrame(update);
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initAnimePet);
+	} else {
+		initAnimePet();
+	}
+
+	document.addEventListener("astro:page-load", initAnimePet);
+</script>

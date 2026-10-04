@@ -1,0 +1,40 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="404 — Roshan Kumar">
+	<div
+		class="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center"
+	>
+		<div class="space-y-6">
+			<h1
+				class="text-7xl font-bold tracking-tight text-[var(--foreground)] sm:text-9xl"
+			>
+				404
+			</h1>
+
+			<div class="space-y-2">
+				<h2
+					class="text-xl font-medium tracking-tight text-[var(--foreground)] sm:text-2xl"
+				>
+					Page not found
+				</h2>
+				<p
+					class="text-base font-light text-[var(--muted-foreground)] sm:text-lg max-w-md mx-auto"
+				>
+					The page you are looking for doesn't exist, has been moved,
+					or you just fell into a rabbit hole.
+				</p>
+			</div>
+
+			<div class="pt-10">
+				<a
+					href="/"
+					class="inline-flex items-center text-[11px] font-semibold uppercase tracking-widest text-[var(--muted-foreground)] transition-colors hover:text-[var(--primary)]"
+				>
+					&larr; Return to base
+				</a>
+			</div>
+		</div>
+	</div>
+</BaseLayout>

@@ -1,0 +1,86 @@
+---
+title: "byte_me"
+tagline: "Multi-threaded chunked downloader for Dart because single-threaded downloads freeze UIs."
+description: "A pure Dart download engine that splits large files across worker isolates using HTTP byte-ranges. Writes straight to disk in parallel so downloading a 500MB video doesn't turn your Flutter app into a slideshow."
+category: "Dart Library"
+year: "2024"
+role: "Creator"
+status: "Active · Open Source"
+
+order: 20
+featured: true
+
+accentColor: "#06b6d4"
+
+githubUrl: "https://github.com/roshancodespace/byte_me"
+languages: ["Dart", "Concurrency", "I/O"]
+
+specs:
+  - label: "Runtime"
+    value: "Pure Dart 3.x (Flutter & Server compatible)"
+  - label: "Concurrency"
+    value: "Dart Worker Isolates + SendPort/ReceivePort"
+  - label: "Protocol"
+    value: "HTTP/1.1 & HTTP/2 Byte-Range Partitioning"
+  - label: "Memory Strategy"
+    value: "Zero-copy TransferableTypedData"
+
+previewSnippet:
+  lang: dart
+  code: |
+    final task = ByteMeTask(
+      url: videoStreamUri,
+      chunks: 4,
+      onProgress: (p) => print('${p.percentage}% @ ${p.speedMb}MB/s'),
+    );
+    await task.start();
+---
+
+## Overview & Motivation
+
+While building the offline download feature in ShonenX, I hit an annoying wall: standard Dart `HttpClient` downloads stream sequentially on a single thread. When you're trying to pull a 600MB high-bitrate video file while simultaneously writing buffers to disk, Dart's event loop gets jammed and the UI starts dropping frames like crazy.
+
+I went looking for existing Flutter download packages, and the options were depressing: either abandoned wrappers around ancient native Android/iOS libraries with flaky permissions, or plugins that didn't support Linux and desktop platforms at all.
+
+Out of sheer stubbornness, I built `byte_me`. It's a pure Dart package with zero platform-channel dependencies that splits files into parallel byte-range chunks, delegates network decompression to background worker isolates, and writes directly into pre-allocated disk offsets.
+
+## Architecture & Decisions
+
+Designed around isolate parallelism and zero-overhead buffer handling.
+
+<Point title="Byte-Range Partitioning">
+Checks for `Accept-Ranges: bytes` via a quick `HEAD` request, figures out the file size, and splits the byte payload evenly across worker isolates so your connection actually gets saturated.
+</Point>
+
+<Point title="Non-Blocking RandomAccessFile Streaming">
+Worker isolates don't hold the entire file in RAM like a bad memory leak. They write incoming buffer segments directly into their exact byte offset on disk using non-blocking asynchronous file pointers.
+</Point>
+
+<Point title="Resilient Pause & Resume Manifest">
+Keeps a lightweight append-only checkpoint manifest. If your phone switches from Wi-Fi to LTE, or the app process gets terminated, resuming the download picks up exactly at the last verified chunk instead of starting over from 0%.
+</Point>
+
+## Engineering Challenges
+
+<Challenge title="Accidental Buffer Cloning Across Isolates">
+  <Problem>Dart isolates do not share memory by default. Sending large raw `Uint8List` byte chunks across `SendPort` boundaries was causing Dart to duplicate buffers, instantly spiking RAM into the gigabytes.</Problem>
+  <Solution>Utilized `TransferableTypedData` to pass raw byte buffer memory pointers across isolate boundaries with true zero-copy ownership transfer.</Solution>
+</Challenge>
+
+<Challenge title="Silent Socket Freezes on Mobile">
+  <Problem>When Android transitions between Wi-Fi and cell towers, active sockets often go into a zombie state—neither receiving data nor throwing a standard timeout exception.</Problem>
+  <Solution>Implemented an active stream heartbeat watchdog that monitors byte velocity and automatically restarts stalled chunk connections with exponential backoff.</Solution>
+</Challenge>
+
+## Stack & Rationale
+
+<Stack>
+  <StackItem name="Dart 3.x" role="Core Language">Modern pattern matching, records, and native isolates without any native channel glue.</StackItem>
+  <StackItem name="dart:io" role="I/O Layer">Direct file handle manipulation and low-level socket streams.</StackItem>
+  <StackItem name="dart:isolate" role="Parallelism">True multi-threaded hardware execution across CPU cores.</StackItem>
+</Stack>
+
+## What I Learned
+
+- Mobile internet connections are fundamentally hostile and will silently drop TCP connections whenever you look away. Write watchdogs or expect endless GitHub issues.
+- Pure Dart libraries that don't rely on native platform channel wrappers are infinitely easier to debug, test, and maintain across Linux, Android, and Windows.
