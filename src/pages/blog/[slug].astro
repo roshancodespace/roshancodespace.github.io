@@ -3,39 +3,61 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
-	const posts = await getCollection("blog");
+	const posts = (await getCollection("blog")).sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	);
 
-	return posts.map((post) => ({
+	return posts.map((post, index) => ({
 		params: {
 			slug: post.id,
 		},
 		props: {
 			post,
+			prev: index < posts.length - 1 ? posts[index + 1] : null,
+			next: index > 0 ? posts[index - 1] : null,
 		},
 	}));
 }
 
-const { post } = Astro.props;
+const { post, prev, next } = Astro.props;
 const { Content } = await render(post);
+
+// Calculate reading time
+const wordCount = post.body ? post.body.trim().split(/\s+/).length : 500;
+const readingTime = Math.max(1, Math.ceil(wordCount / 220));
+
+// Format title
+function formatTitle(title: string) {
+	return title.replace(
+		/`([^`]+)`/g,
+		'<code class="font-mono text-[0.72em] bg-white/10 border border-white/10 px-2 py-0.5 rounded-md text-white/90 font-normal inline-block align-middle my-1 tracking-normal">$1</code>',
+	);
+}
+
+const plainTitle = post.data.title.replace(/`/g, "");
 ---
 
 <BaseLayout
-	title={`${post.data.title} — Roshan Kumar`}
+	title={`${plainTitle} — Roshan Kumar`}
 	description={post.data.description}
 >
 	<article class="mx-auto max-w-3xl px-6 pt-32 pb-32 sm:px-10">
-		<nav class="mb-20">
+		<nav class="mb-12">
 			<a
 				href="/blog"
-				class="text-[11px] font-medium uppercase tracking-widest text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
+				class="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-white/40 transition-colors hover:text-white group"
 			>
-				&larr; All Writings
+				<span
+					class="text-sm mb-1 leading-none transition-transform duration-200 group-hover:-translate-x-0.5"
+					>&larr;</span
+				>
+				<span>All Writings</span>
 			</a>
 		</nav>
 
-		<header class="mb-12">
+		<header class="space-y-4 mb-12">
 			<div
-				class="mb-6 flex items-center text-[10px] font-semibold uppercase tracking-widest text-[var(--muted-foreground)]"
+				class="flex flex-wrap items-center gap-2 text-xs text-white/40 font-mono"
 			>
 				<time datetime={post.data.pubDate.toISOString()}>
 					{
@@ -46,94 +68,248 @@ const { Content } = await render(post);
 						})
 					}
 				</time>
+				<span>&middot;</span>
+				<span>{readingTime} min read</span>
 				{
 					post.data.tags.length > 0 && (
 						<>
-							<span class="mx-3 text-[var(--border)]">
-								&middot;
-							</span>
-							<span>{post.data.tags.join(" \u00B7 ")}</span>
+							<span>&middot;</span>
+							<div class="flex flex-wrap items-center gap-1.5">
+								{post.data.tags.map((tag: string) => (
+									<span class="rounded bg-white/5 px-2 py-0.5 text-[10px] text-white/60">
+										{tag}
+									</span>
+								))}
+							</div>
 						</>
 					)
 				}
 			</div>
 
 			<h1
-				class="mb-6 text-4xl font-semibold tracking-tight text-[var(--foreground)] sm:text-5xl lg:text-6xl"
-			>
-				{post.data.title}
-			</h1>
+				class="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl leading-snug sm:leading-snug md:leading-[1.25]"
+				set:html={formatTitle(post.data.title)}
+			/>
 
 			<p
-				class="text-xl font-light leading-relaxed text-[var(--muted-foreground)] sm:text-2xl"
+				class="text-lg leading-relaxed text-white/60 sm:text-xl font-light"
 			>
 				{post.data.description}
 			</p>
 		</header>
 
-		<div class="border-t border-[var(--border)] pt-8">
+		<div class="border-t border-white/10 pt-10">
 			<div
-				class="prose-content space-y-6 text-base font-light leading-relaxed text-[var(--foreground)] sm:text-lg"
+				class="prose-content space-y-6 text-base leading-relaxed text-white/70 sm:text-lg"
 			>
 				<Content />
 			</div>
 		</div>
+
+		{
+			(prev || next) && (
+				<footer class="mt-20 border-t border-white/10 pt-8 flex items-baseline justify-between text-sm">
+					{prev ? (
+						<a
+							href={`/blog/${prev.id}`}
+							class="text-white/40 hover:text-white transition-colors flex items-center gap-2 group max-w-[45%]"
+						>
+							<span class="transition-transform mb-1 group-hover:-translate-x-1">
+								&larr;
+							</span>
+							<span
+								class="truncate"
+								set:html={formatTitle(prev.data.title)}
+							/>
+						</a>
+					) : (
+						<div />
+					)}
+
+					{next ? (
+						<a
+							href={`/blog/${next.id}`}
+							class="text-white/40 hover:text-white transition-colors flex items-center gap-2 group max-w-[45%] text-right ml-auto"
+						>
+							<span
+								class="truncate"
+								set:html={formatTitle(next.data.title)}
+							/>
+							<span class="transition-transform group-hover:translate-x-1">
+								&rarr;
+							</span>
+						</a>
+					) : (
+						<div />
+					)}
+				</footer>
+			)
+		}
 	</article>
 </BaseLayout>
 
 <style>
 	.prose-content :global(p) {
 		margin-top: 1.5rem;
-		line-height: 1.8;
-		opacity: 0.8;
+		line-height: 1.85;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 1.05rem;
 	}
+
+	.prose-content :global(h2),
 	.prose-content :global(h3) {
-		font-size: 1.5rem;
+		color: #ffffff;
 		font-weight: 500;
-		color: var(--foreground);
 		margin-top: 3.5rem;
 		margin-bottom: 1rem;
-		letter-spacing: -0.01em;
+		letter-spacing: -0.015em;
 	}
+
+	.prose-content :global(h2) {
+		font-size: 1.5rem;
+	}
+
+	.prose-content :global(h3) {
+		font-size: 1.35rem;
+	}
+
+	.prose-content :global(h4) {
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.9);
+		margin-top: 2rem;
+		margin-bottom: 0.75rem;
+	}
+
 	.prose-content :global(ul) {
-		list-style-type: none;
+		list-style: none;
 		padding-left: 0;
 		margin-top: 1.5rem;
 		margin-bottom: 1.5rem;
-		opacity: 0.8;
 	}
-	.prose-content :global(li) {
+
+	.prose-content :global(ul > li) {
 		margin-top: 0.5rem;
 		position: relative;
 		padding-left: 1.5rem;
+		color: rgba(255, 255, 255, 0.7);
 	}
-	.prose-content :global(li::before) {
+
+	.prose-content :global(ul > li::before) {
 		content: "-";
 		position: absolute;
 		left: 0;
-		color: var(--muted-foreground);
+		color: rgba(255, 255, 255, 0.35);
 	}
+
+	.prose-content :global(ol) {
+		list-style-type: decimal;
+		padding-left: 1.5rem;
+		margin-top: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.prose-content :global(ol > li) {
+		margin-top: 0.5rem;
+		padding-left: 0.25rem;
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.prose-content :global(a) {
+		color: #ffffff;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		text-decoration-color: rgba(255, 255, 255, 0.25);
+		transition: text-decoration-color 0.2s;
+	}
+
+	.prose-content :global(a:hover) {
+		text-decoration-color: #ffffff;
+	}
+
+	.prose-content :global(blockquote) {
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+		padding-left: 1.25rem;
+		border-left: 2px solid rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.6);
+		font-style: italic;
+	}
+
 	.prose-content :global(pre) {
-		padding: 1.5rem;
-		border-radius: var(--radius-card);
+		padding: 1.25rem 1.5rem;
 		overflow-x: auto;
-		margin-top: 2.5rem;
-		margin-bottom: 2.5rem;
-		border: 1px solid var(--border);
+		border-radius: var(--radius-card);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+		font-family: var(--font-mono);
+		font-size: 0.875em;
+		line-height: 1.7;
 	}
+
 	.prose-content :global(:not(pre) > code) {
 		font-family: var(--font-mono);
-		font-size: 0.85em;
-		background: var(--muted);
+		font-size: 0.86em;
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		padding: 0.15rem 0.35rem;
-		border-radius: var(--radius-code);
-		color: var(--foreground);
+		border-radius: 4px;
+		color: rgba(255, 255, 255, 0.9);
 	}
+
+	.prose-content :global(p:has(> code:only-child)) {
+		margin-top: 1.25rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.prose-content :global(p:has(> code:only-child) > code) {
+		display: inline-block;
+		padding: 0.35rem 0.75rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.95);
+		font-size: 0.92em;
+	}
+
 	.prose-content :global(strong) {
 		font-weight: 600;
-		color: var(--foreground);
+		color: #ffffff;
 	}
+
 	.prose-content :global(em) {
 		font-style: italic;
 	}
 </style>
+
+<script>
+	// Colorize mathematical functions
+	document
+		.querySelectorAll(".prose-content :not(pre) > code")
+		.forEach((code) => {
+			let html = code.innerHTML;
+			let modified = false;
+
+			// Highlight function name
+			if (html.includes("GCD")) {
+				html = html.replace(
+					/\b(GCD)\b/g,
+					'<span class="text-[#FFC799] font-medium">$1</span>',
+				);
+				modified = true;
+			}
+
+			// Convert any ^2 or ^power into proper superscript if present
+			if (html.includes("^")) {
+				html = html
+					.replace(/\^2\b/g, "²")
+					.replace(/\^(\d+)/g, "<sup>$1</sup>");
+				modified = true;
+			}
+
+			if (modified) {
+				code.innerHTML = html;
+			}
+		});
+</script>

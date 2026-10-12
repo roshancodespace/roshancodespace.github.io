@@ -15,7 +15,7 @@ export default defineConfig({
 
   markdown: {
     shikiConfig: {
-      theme: 'poimandres',
+      theme: 'vesper',
       wrap: true,
     }
   }

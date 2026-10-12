@@ -9,6 +9,13 @@ const featuredProjects = await getFeaturedProjects();
 const recentPosts = (await getCollection("blog"))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.slice(0, 3);
+
+function formatTitle(title: string) {
+	return title.replace(
+		/`([^`]+)`/g,
+		'<code class="font-mono text-[0.75em] bg-white/10 border border-white/10 px-2 py-0.5 rounded-md text-white/90 font-normal inline-block align-middle my-0.5 tracking-normal">$1</code>',
+	);
+}
 ---
 
 <BaseLayout title="Roshan Kumar — Developer & Builder">
@@ -267,9 +274,10 @@ const recentPosts = (await getCollection("blog"))
 								</div>
 							</div>
 
-							<h3 class="mt-2 text-lg font-medium tracking-tight text-white/90 group-hover:text-white transition-colors">
-								{post.data.title}
-							</h3>
+							<h3
+								class="mt-2 text-lg font-medium tracking-tight text-white/90 group-hover:text-white transition-colors"
+								set:html={formatTitle(post.data.title)}
+							/>
 
 							<p class="mt-1 text-sm text-white/50 leading-relaxed max-w-3xl">
 								{post.data.description}
