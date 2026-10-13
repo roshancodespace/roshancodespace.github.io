@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProjectGrid from "../components/ProjectGrid.astro";
 import SkillTree from "../components/SkillTree.astro";
+import HeroGrassland from "../components/HeroGrassland.astro";
 import { getFeaturedProjects } from "../lib/projects";
 
 const featuredProjects = await getFeaturedProjects();
@@ -19,6 +20,7 @@ function formatTitle(title: string) {
 ---
 
 <BaseLayout title="Roshan Kumar — Developer & Builder">
+	<!-- <HeroGrassland /> -->
 	<section
 		class="relative mx-auto max-w-7xl grid min-h-screen grid-cols-1 items-center gap-16 py-16 md:grid-cols-3"
 	>

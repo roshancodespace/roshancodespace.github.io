@@ -1,7 +1,9 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import Navbar from "./Navbar.astro";
 import Footer from "./Footer.astro";
-import AnimePet from "../components/AnimePet.astro";
+import ProgressiveBlur from "../components/ProgressiveBlur.astro";
+// import AnimePet from "../components/AnimePet.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -24,13 +26,59 @@ const {
         <meta name="viewport" content="width=device-width" />
         <meta name="description" content={description} />
         <title>{title}</title>
+        <ClientRouter />
     </head>
-    <body>
+    <body
+        class="min-h-screen flex flex-col justify-between selection:bg-white/20 selection:text-white"
+    >
+        <ProgressiveBlur position="top" />
         <Navbar />
-        <main class={className}>
+        <main class={`flex-1 ${className}`}>
             <slot />
         </main>
         <Footer />
-        <AnimePet />
+        <ProgressiveBlur position="bottom" />
+        <!-- <AnimePet transition:persist /> -->
+
+        <script>
+            function setupScrollObserver() {
+                const reveals = document.querySelectorAll(
+                    ".reveal-on-scroll:not(.is-visible)",
+                );
+                if (reveals.length === 0) return;
+
+                if (!("IntersectionObserver" in window)) {
+                    reveals.forEach((el) => el.classList.add("is-visible"));
+                    return;
+                }
+
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("is-visible");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    {
+                        threshold: 0.08,
+                        rootMargin: "0px 0px -30px 0px",
+                    },
+                );
+
+                reveals.forEach((el) => observer.observe(el));
+            }
+
+            document.addEventListener("astro:page-load", setupScrollObserver);
+            if (document.readyState === "loading") {
+                document.addEventListener(
+                    "DOMContentLoaded",
+                    setupScrollObserver,
+                );
+            } else {
+                setupScrollObserver();
+            }
+        </script>
     </body>
 </html>

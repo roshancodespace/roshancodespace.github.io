@@ -1,0 +1,427 @@
+---
+interface Props {
+	position?: "top" | "bottom";
+	className?: string;
+}
+
+const { position = "top", className = "" } = Astro.props;
+const isTop = position === "top";
+const persistKey = isTop ? "progressive-blur-top" : "progressive-blur-bottom";
+---
+
+<div
+	class={`progressive-blur ${isTop ? "progressive-blur-top" : "progressive-blur-bottom"} ${className}`}
+	aria-hidden="true"
+	transition:persist={persistKey}
+>
+	<div class="blur-layer layer-1"></div>
+	<div class="blur-layer layer-2"></div>
+	<div class="blur-layer layer-3"></div>
+	<div class="blur-layer layer-4"></div>
+	<div class="blur-layer layer-5"></div>
+	<div class="blur-layer layer-6"></div>
+	<div class="blur-layer layer-7"></div>
+	<div class="blur-layer layer-8"></div>
+	<div class="gradient-layer"></div>
+</div>
+
+<style>
+	.progressive-blur {
+		position: fixed;
+		left: 0;
+		right: 0;
+		pointer-events: none;
+		user-select: none;
+		overflow: hidden;
+	}
+
+	.progressive-blur-top {
+		top: 0;
+		height: 7.5rem; /* 120px */
+		z-index: 40;
+	}
+
+	@media (min-width: 640px) {
+		.progressive-blur-top {
+			height: 8.5rem; /* 136px */
+		}
+	}
+
+	.progressive-blur-bottom {
+		bottom: 0;
+		height: 4.5rem; /* 72px */
+		z-index: 30;
+	}
+
+	@media (min-width: 640px) {
+		.progressive-blur-bottom {
+			height: 5.5rem; /* 88px */
+		}
+	}
+
+	.progressive-blur .blur-layer {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	/* TOP EDGE GRADIENT BLUR */
+	.progressive-blur-top .layer-1 {
+		backdrop-filter: blur(32px);
+		-webkit-backdrop-filter: blur(32px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 1) 0%,
+			rgba(0, 0, 0, 1) 25%,
+			rgba(0, 0, 0, 0) 42%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 1) 0%,
+			rgba(0, 0, 0, 1) 25%,
+			rgba(0, 0, 0, 0) 42%
+		);
+	}
+
+	.progressive-blur-top .layer-2 {
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 10%,
+			rgba(0, 0, 0, 1) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 0) 52%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 10%,
+			rgba(0, 0, 0, 1) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 0) 52%
+		);
+	}
+
+	.progressive-blur-top .layer-3 {
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 0) 64%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 0) 64%
+		);
+	}
+
+	.progressive-blur-top .layer-4 {
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 0) 76%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 0) 76%
+		);
+	}
+
+	.progressive-blur-top .layer-5 {
+		backdrop-filter: blur(3px);
+		-webkit-backdrop-filter: blur(3px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 0) 88%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 0) 88%
+		);
+	}
+
+	.progressive-blur-top .layer-6 {
+		backdrop-filter: blur(1.5px);
+		-webkit-backdrop-filter: blur(1.5px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 0) 96%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 0) 96%
+		);
+	}
+
+	.progressive-blur-top .layer-7 {
+		backdrop-filter: blur(0.75px);
+		-webkit-backdrop-filter: blur(0.75px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	.progressive-blur-top .layer-8 {
+		backdrop-filter: blur(0.25px);
+		-webkit-backdrop-filter: blur(0.25px);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	.progressive-blur-top .gradient-layer {
+		position: absolute;
+		inset: 0;
+		background: var(--background);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0.94) 0%,
+			rgba(0, 0, 0, 0.8) 26%,
+			rgba(0, 0, 0, 0.45) 54%,
+			rgba(0, 0, 0, 0.12) 80%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0.94) 0%,
+			rgba(0, 0, 0, 0.8) 26%,
+			rgba(0, 0, 0, 0.45) 54%,
+			rgba(0, 0, 0, 0.12) 80%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	/* BOTTOM EDGE GRADIENT BLUR */
+	.progressive-blur-bottom .layer-1 {
+		backdrop-filter: blur(32px);
+		-webkit-backdrop-filter: blur(32px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 1) 0%,
+			rgba(0, 0, 0, 1) 25%,
+			rgba(0, 0, 0, 0) 42%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 1) 0%,
+			rgba(0, 0, 0, 1) 25%,
+			rgba(0, 0, 0, 0) 42%
+		);
+	}
+
+	.progressive-blur-bottom .layer-2 {
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 10%,
+			rgba(0, 0, 0, 1) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 0) 52%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 10%,
+			rgba(0, 0, 0, 1) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 0) 52%
+		);
+	}
+
+	.progressive-blur-bottom .layer-3 {
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 0) 64%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 22%,
+			rgba(0, 0, 0, 1) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 0) 64%
+		);
+	}
+
+	.progressive-blur-bottom .layer-4 {
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 0) 76%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 35%,
+			rgba(0, 0, 0, 1) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 0) 76%
+		);
+	}
+
+	.progressive-blur-bottom .layer-5 {
+		backdrop-filter: blur(3px);
+		-webkit-backdrop-filter: blur(3px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 0) 88%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 48%,
+			rgba(0, 0, 0, 1) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 0) 88%
+		);
+	}
+
+	.progressive-blur-bottom .layer-6 {
+		backdrop-filter: blur(1.5px);
+		-webkit-backdrop-filter: blur(1.5px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 0) 96%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 60%,
+			rgba(0, 0, 0, 1) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 0) 96%
+		);
+	}
+
+	.progressive-blur-bottom .layer-7 {
+		backdrop-filter: blur(0.75px);
+		-webkit-backdrop-filter: blur(0.75px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 72%,
+			rgba(0, 0, 0, 1) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	.progressive-blur-bottom .layer-8 {
+		backdrop-filter: blur(0.25px);
+		-webkit-backdrop-filter: blur(0.25px);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0) 84%,
+			rgba(0, 0, 0, 1) 94%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	.progressive-blur-bottom .gradient-layer {
+		position: absolute;
+		inset: 0;
+		background: var(--background);
+		-webkit-mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.94) 0%,
+			rgba(0, 0, 0, 0.8) 26%,
+			rgba(0, 0, 0, 0.45) 54%,
+			rgba(0, 0, 0, 0.12) 80%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		mask-image: linear-gradient(
+			to top,
+			rgba(0, 0, 0, 0.94) 0%,
+			rgba(0, 0, 0, 0.8) 26%,
+			rgba(0, 0, 0, 0.45) 54%,
+			rgba(0, 0, 0, 0.12) 80%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
+
+	/* Fallback for browsers without backdrop-filter support */
+	@supports not (backdrop-filter: blur(10px)) {
+		.progressive-blur-top {
+			background: linear-gradient(
+				to bottom,
+				var(--background) 70%,
+				transparent 100%
+			);
+		}
+		.progressive-blur-bottom {
+			background: linear-gradient(
+				to top,
+				var(--background) 70%,
+				transparent 100%
+			);
+		}
+	}
+</style>

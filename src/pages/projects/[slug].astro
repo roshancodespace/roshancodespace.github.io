@@ -41,18 +41,22 @@ const { Content } = await render(entry);
 	description={project.description}
 >
 	<article class="mx-auto max-w-3xl px-6 pt-32 pb-32 sm:px-10">
-		<nav class="mb-12">
+		<nav class="mb-12 animate-fade-in">
 			<a
 				href="/projects"
-				class="text-xs uppercase tracking-wider text-white/40 transition-colors hover:text-white"
+				class="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-white/40 transition-colors hover:text-white group"
 			>
-				&larr; All Projects
+				<span
+					class="transition-transform duration-200 group-hover:-translate-x-1"
+					>&larr;</span
+				>
+				<span>All Projects</span>
 			</a>
 		</nav>
 
-		<header class="space-y-4">
+		<header class="space-y-4 animate-fade-in-up">
 			<p
-				class="text-xs font-medium uppercase tracking-widest text-white/40"
+				class="text-xs font-medium uppercase tracking-widest text-white/40 font-mono"
 			>
 				{project.category} &middot; {project.year}
 			</p>
@@ -72,7 +76,7 @@ const { Content } = await render(entry);
 			>
 				<div>
 					<span
-						class="text-xs text-white/35 uppercase tracking-wider block"
+						class="text-xs text-white/35 uppercase tracking-wider block font-mono"
 					>
 						Role
 					</span>
@@ -82,7 +86,7 @@ const { Content } = await render(entry);
 				</div>
 				<div>
 					<span
-						class="text-xs text-white/35 uppercase tracking-wider block"
+						class="text-xs text-white/35 uppercase tracking-wider block font-mono"
 					>
 						Stack
 					</span>
@@ -92,7 +96,7 @@ const { Content } = await render(entry);
 				</div>
 				<div>
 					<span
-						class="text-xs text-white/35 uppercase tracking-wider block"
+						class="text-xs text-white/35 uppercase tracking-wider block font-mono"
 					>
 						Timeline
 					</span>
@@ -102,7 +106,7 @@ const { Content } = await render(entry);
 				</div>
 				<div>
 					<span
-						class="text-xs text-white/35 uppercase tracking-wider block"
+						class="text-xs text-white/35 uppercase tracking-wider block font-mono"
 					>
 						Source
 					</span>
@@ -128,17 +132,17 @@ const { Content } = await render(entry);
 
 		{
 			project.image && (
-				<div class="my-12 flex items-center justify-center overflow-hidden rounded-card bg-white/[0.02] border border-white/10 p-4 max-h-[560px]">
+				<div class="my-12 flex items-center justify-center overflow-hidden rounded-card bg-white/[0.02] border border-white/10 p-4 max-h-[560px] animate-scale-in delay-150 transition-all duration-300 hover:border-white/20 hover:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.5)]">
 					<img
 						src={project.image}
 						alt={project.title}
-						class="max-h-[520px] w-auto max-w-full rounded-media object-contain"
+						class="max-h-[520px] w-auto max-w-full rounded-media object-contain transition-transform duration-500 hover:scale-[1.02]"
 					/>
 				</div>
 			)
 		}
 
-		<div class="mt-14">
+		<div class="mt-14 animate-fade-in delay-200">
 			<ProjectProse>
 				<Content components={mdxComponents} />
 			</ProjectProse>
@@ -149,18 +153,24 @@ const { Content } = await render(entry);
 		>
 			<a
 				href={`/projects/${prev.id}`}
-				class="text-white/40 hover:text-white transition-colors flex items-center gap-2"
+				class="text-white/40 hover:text-white transition-colors flex items-center gap-2 group"
 			>
-				<span>&larr;</span>
+				<span
+					class="transition-transform duration-200 group-hover:-translate-x-1"
+					>&larr;</span
+				>
 				<span>{prev.data.title}</span>
 			</a>
 
 			<a
 				href={`/projects/${next.id}`}
-				class="text-white/40 hover:text-white transition-colors flex items-center gap-2"
+				class="text-white/40 hover:text-white transition-colors flex items-center gap-2 group"
 			>
 				<span>{next.data.title}</span>
-				<span>&rarr;</span>
+				<span
+					class="transition-transform duration-200 group-hover:translate-x-1"
+					>&rarr;</span
+				>
 			</a>
 		</footer>
 	</article>

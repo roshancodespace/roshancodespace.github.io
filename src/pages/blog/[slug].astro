@@ -41,21 +41,56 @@ const plainTitle = post.data.title.replace(/`/g, "");
 	title={`${plainTitle} — Roshan Kumar`}
 	description={post.data.description}
 >
+	<!-- Scroll-driven Reading Progress Bar -->
+	<div
+		id="reading-progress-track"
+		class="fixed top-0 left-0 right-0 z-[60] h-[2px] pointer-events-none bg-transparent"
+		aria-hidden="true"
+	>
+		<div
+			id="reading-progress-bar"
+			class="reading-progress-fill h-full w-full origin-left bg-gradient-to-r from-[#FFC799] via-[#FFA451] to-white opacity-90 shadow-[0_0_10px_rgba(255,199,153,0.7)]"
+			style="transform: scaleX(0);"
+		>
+		</div>
+	</div>
+
+	<!-- Floating Back to Top Button -->
+	<button
+		id="back-to-top"
+		type="button"
+		aria-label="Back to top"
+		class="fixed bottom-7 right-7 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/80 backdrop-blur-md text-white/50 opacity-0 translate-y-3 pointer-events-none transition-all duration-300 ease-out hover:border-white/30 hover:bg-white/10 hover:text-white hover:scale-105 active:scale-95 shadow-lg shadow-black/40"
+	>
+		<svg
+			class="h-4 w-4"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M5 15l7-7 7 7"></path>
+		</svg>
+	</button>
+
 	<article class="mx-auto max-w-3xl px-6 pt-32 pb-32 sm:px-10">
-		<nav class="mb-12">
+		<nav class="mb-12 animate-fade-in">
 			<a
 				href="/blog"
 				class="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-white/40 transition-colors hover:text-white group"
 			>
 				<span
-					class="text-sm mb-1 leading-none transition-transform duration-200 group-hover:-translate-x-0.5"
+					class="text-sm mb-0.5 leading-none transition-transform duration-200 group-hover:-translate-x-1"
 					>&larr;</span
 				>
 				<span>All Writings</span>
 			</a>
 		</nav>
 
-		<header class="space-y-4 mb-12">
+		<header class="space-y-4 mb-12 animate-fade-in-up">
 			<div
 				class="flex flex-wrap items-center gap-2 text-xs text-white/40 font-mono"
 			>
@@ -76,7 +111,7 @@ const plainTitle = post.data.title.replace(/`/g, "");
 							<span>&middot;</span>
 							<div class="flex flex-wrap items-center gap-1.5">
 								{post.data.tags.map((tag: string) => (
-									<span class="rounded bg-white/5 px-2 py-0.5 text-[10px] text-white/60">
+									<span class="rounded bg-white/5 px-2 py-0.5 text-[10px] text-white/60 transition-colors hover:bg-white/10 hover:text-white">
 										{tag}
 									</span>
 								))}
@@ -100,7 +135,7 @@ const plainTitle = post.data.title.replace(/`/g, "");
 
 		<div class="border-t border-white/10 pt-10">
 			<div
-				class="prose-content space-y-6 text-base leading-relaxed text-white/70 sm:text-lg"
+				class="prose-content space-y-6 text-base leading-relaxed text-white/70 sm:text-lg animate-fade-in delay-150"
 			>
 				<Content />
 			</div>
@@ -114,7 +149,7 @@ const plainTitle = post.data.title.replace(/`/g, "");
 							href={`/blog/${prev.id}`}
 							class="text-white/40 hover:text-white transition-colors flex items-center gap-2 group max-w-[45%]"
 						>
-							<span class="transition-transform mb-1 group-hover:-translate-x-1">
+							<span class="transition-transform duration-200 mb-0.5 group-hover:-translate-x-1">
 								&larr;
 							</span>
 							<span
@@ -135,7 +170,7 @@ const plainTitle = post.data.title.replace(/`/g, "");
 								class="truncate"
 								set:html={formatTitle(next.data.title)}
 							/>
-							<span class="transition-transform group-hover:translate-x-1">
+							<span class="transition-transform duration-200 mb-0.5 group-hover:translate-x-1">
 								&rarr;
 							</span>
 						</a>
@@ -227,6 +262,14 @@ const plainTitle = post.data.title.replace(/`/g, "");
 		text-decoration-color: #ffffff;
 	}
 
+	@supports (animation-timeline: scroll()) {
+		#reading-progress-bar {
+			transform-origin: 0% 50%;
+			animation: reading-bar-grow auto linear;
+			animation-timeline: scroll(root block);
+		}
+	}
+
 	.prose-content :global(blockquote) {
 		margin-top: 2rem;
 		margin-bottom: 2rem;
@@ -237,6 +280,7 @@ const plainTitle = post.data.title.replace(/`/g, "");
 	}
 
 	.prose-content :global(pre) {
+		position: relative;
 		padding: 1.25rem 1.5rem;
 		overflow-x: auto;
 		border-radius: var(--radius-card);
@@ -246,6 +290,14 @@ const plainTitle = post.data.title.replace(/`/g, "");
 		font-family: var(--font-mono);
 		font-size: 0.875em;
 		line-height: 1.7;
+		transition:
+			border-color 0.25s ease,
+			box-shadow 0.25s ease;
+	}
+
+	.prose-content :global(pre:hover) {
+		border-color: rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
 	}
 
 	.prose-content :global(:not(pre) > code) {
@@ -284,32 +336,139 @@ const plainTitle = post.data.title.replace(/`/g, "");
 </style>
 
 <script>
-	// Colorize mathematical functions
-	document
-		.querySelectorAll(".prose-content :not(pre) > code")
-		.forEach((code) => {
-			let html = code.innerHTML;
-			let modified = false;
+	function initBlogPost() {
+		// 1. Reading progress bar fallback & back-to-top button
+		const progressBar = document.getElementById("reading-progress-bar");
+		const backToTopBtn = document.getElementById("back-to-top");
 
-			// Highlight function name
-			if (html.includes("GCD")) {
-				html = html.replace(
-					/\b(GCD)\b/g,
-					'<span class="text-[#FFC799] font-medium">$1</span>',
-				);
-				modified = true;
+		const updateScrollState = () => {
+			const scrollTop =
+				window.scrollY || document.documentElement.scrollTop;
+			const scrollHeight =
+				document.documentElement.scrollHeight -
+				document.documentElement.clientHeight;
+
+			if (progressBar && !CSS.supports("animation-timeline: scroll()")) {
+				const progress =
+					scrollHeight > 0
+						? Math.min(1, Math.max(0, scrollTop / scrollHeight))
+						: 0;
+				progressBar.style.transform = `scaleX(${progress})`;
 			}
 
-			// Convert any ^2 or ^power into proper superscript if present
-			if (html.includes("^")) {
-				html = html
-					.replace(/\^2\b/g, "²")
-					.replace(/\^(\d+)/g, "<sup>$1</sup>");
-				modified = true;
+			if (backToTopBtn) {
+				if (scrollTop > 350) {
+					backToTopBtn.classList.remove(
+						"opacity-0",
+						"translate-y-3",
+						"pointer-events-none",
+					);
+					backToTopBtn.classList.add(
+						"opacity-100",
+						"translate-y-0",
+						"pointer-events-auto",
+					);
+				} else {
+					backToTopBtn.classList.add(
+						"opacity-0",
+						"translate-y-3",
+						"pointer-events-none",
+					);
+					backToTopBtn.classList.remove(
+						"opacity-100",
+						"translate-y-0",
+						"pointer-events-auto",
+					);
+				}
 			}
+		};
 
-			if (modified) {
-				code.innerHTML = html;
-			}
+		window.removeEventListener("scroll", updateScrollState);
+		window.addEventListener("scroll", updateScrollState, { passive: true });
+		updateScrollState();
+
+		backToTopBtn?.addEventListener("click", () => {
+			window.scrollTo({ top: 0, behavior: "smooth" });
 		});
+
+		// 2. Add copy button to code blocks
+		document.querySelectorAll(".prose-content pre").forEach((pre) => {
+			if (pre.querySelector(".copy-code-btn")) return;
+
+			const copyBtn = document.createElement("button");
+			copyBtn.className =
+				"copy-code-btn absolute top-3 right-3 flex items-center gap-1.5 rounded bg-white/10 hover:bg-white/20 px-2 py-1 text-[11px] font-mono text-white/70 hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100";
+			copyBtn.setAttribute("aria-label", "Copy code snippet");
+			copyBtn.innerHTML = `
+				<svg class="h-3.5 w-3.5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+				</svg>
+				<span class="copy-text">Copy</span>
+			`;
+
+			pre.classList.add("group");
+			pre.appendChild(copyBtn);
+
+			copyBtn.addEventListener("click", async () => {
+				const codeEl = pre.querySelector("code");
+				const textToCopy = codeEl ? codeEl.innerText : pre.textContent;
+
+				try {
+					await navigator.clipboard.writeText(textToCopy);
+					copyBtn.innerHTML = `
+						<svg class="h-3.5 w-3.5 text-[#FFC799]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+						</svg>
+						<span class="text-[#FFC799]">Copied!</span>
+					`;
+					setTimeout(() => {
+						copyBtn.innerHTML = `
+							<svg class="h-3.5 w-3.5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+							</svg>
+							<span class="copy-text">Copy</span>
+						`;
+					}, 2000);
+				} catch (err) {
+					console.error("Failed to copy:", err);
+				}
+			});
+		});
+
+		// 3. Colorize mathematical functions
+		document
+			.querySelectorAll(".prose-content :not(pre) > code")
+			.forEach((code) => {
+				let html = code.innerHTML;
+				let modified = false;
+
+				// Highlight function name
+				if (html.includes("GCD")) {
+					html = html.replace(
+						/\b(GCD)\b/g,
+						'<span class="text-[#FFC799] font-medium">$1</span>',
+					);
+					modified = true;
+				}
+
+				// Convert any ^2 or ^power into proper superscript if present
+				if (html.includes("^")) {
+					html = html
+						.replace(/\^2\b/g, "²")
+						.replace(/\^(\d+)/g, "<sup>$1</sup>");
+					modified = true;
+				}
+
+				if (modified) {
+					code.innerHTML = html;
+				}
+			});
+	}
+
+	document.addEventListener("astro:page-load", initBlogPost);
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initBlogPost);
+	} else {
+		initBlogPost();
+	}
 </script>
